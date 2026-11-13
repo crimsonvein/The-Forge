@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Forge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#16171a;--card:#23252a;--text:#e6e6e6;--a1:#8d99ae;--a2:#edf2f4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:10px/1.7 "Press Start 2P",ui-monospace,monospace;padding:env(safe-area-inset-top,0) 0 calc(76px + env(safe-area-inset-bottom,0))}
+main{max-width:480px;margin:0 auto;padding:14px}
+.c{background:var(--card);border:4px solid var(--a1);box-shadow:4px 4px 0 #000;padding:12px;margin-bottom:14px}
+h1,h2{font-size:12px;margin:0 0 10px;color:var(--a2)} h1{font-size:16px;text-align:center}
+.m{color:var(--a1);font-size:8px}
+button,input,select{font:inherit;color:var(--text)}
+button{background:var(--a1);color:#000;border:4px solid #000;box-shadow:3px 3px 0 #000;padding:9px 10px;cursor:pointer}
+button:active{transform:translate(3px,3px);box-shadow:none}
+button.g{background:var(--card);color:var(--text);border-color:var(--a1)}
+button:disabled{opacity:.4}
+input,select{width:100%;background:var(--bg);border:4px solid var(--a1);padding:9px;margin:4px 0 10px}
+input[type=color]{padding:0;height:40px}
+label{font-size:8px;color:var(--a1)}
+.r{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.bar{height:16px;border:4px solid #000;background:#000;margin:6px 0}.bar i{display:block;height:100%;background:var(--a2);width:0}
+.bar.h i{background:var(--a1)}
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0));background:#000}
+.nav button{flex:1;font-size:8px}
+.pet{width:168px;height:144px;image-rendering:pixelated;display:block;margin:6px auto;animation:bob 1s steps(2) infinite}
+.pet.hungry{filter:saturate(.5)}.pet.critical{filter:grayscale(1);animation:sh .3s steps(2) infinite}.pet.dim{opacity:.55}
+@keyframes bob{50%{transform:translateY(-6px)}}@keyframes sh{50%{transform:translateX(4px)}}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pk{border:4px solid var(--a1);background:var(--bg);padding:4px;text-align:center;font-size:7px;color:var(--text)}
+.pk img{width:100%;image-rendering:pixelated}.pk.sel{border-color:var(--a2);background:var(--card)}.pk.lk{opacity:.4}
+.sw{display:flex;gap:4px;flex-wrap:wrap}.sw button{font-size:7px;padding:6px}
+.q.done{border-color:var(--a2)}
+#toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0));transform:translateX(-50%);background:#000;color:var(--a2);border:4px solid var(--a2);padding:8px 12px;display:none;z-index:9;text-align:center}
+.lock{border-color:var(--a2);text-align:center}
+.err{color:#ff6b6b;font-size:8px;margin:6px 0}
+.top{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:4px solid var(--a1);position:sticky;top:0;background:var(--bg);z-index:4}
+.top button{padding:6px 12px;font-size:14px}
+.stage{position:relative;display:flex;flex-direction:column;align-items:center;padding:22px 14px 190px;min-height:calc(100vh - 140px)}
+.start{width:80%;max-width:340px;font-size:20px;padding:22px}
+.fig{position:relative;width:120px;margin-top:46px;z-index:2}.fig img{width:120px;image-rendering:pixelated;display:block}
+.fig .pfp{position:absolute;left:30px;top:0;width:60px;height:60px;border-radius:50%;object-fit:cover;border:4px solid #000;image-rendering:auto}
+.plat{width:250px;height:56px;border:4px solid var(--a1);border-radius:50%;background:var(--card);margin-top:-30px}
+.pet.sm{position:absolute;right:4%;bottom:205px;width:112px;height:96px;cursor:pointer;margin:0}
+.pn{margin-top:14px;text-align:center}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;background:#000;padding-bottom:env(safe-area-inset-bottom,0)}
+.sheet{max-height:55vh;overflow:auto;background:var(--bg);border-top:4px solid var(--a1);padding:12px}
+.tg{margin:6px 8px;padding:4px 14px;font-size:10px}
+.nav2{display:flex;gap:6px;padding:0 8px 8px}.nav2 button{flex:1;font-size:8px}
+.scrim{position:fixed;inset:0;background:#0009;z-index:6}
+.drawer{position:fixed;left:0;top:0;bottom:0;width:78%;max-width:320px;background:var(--bg);border-right:4px solid var(--a1);padding:16px;z-index:7;overflow:auto}
+.modal{position:fixed;left:50%;top:30%;transform:translateX(-50%);width:84%;max-width:360px;z-index:7}
+body{padding:0}
+.app{display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top,0)}
+.stage{flex:1;min-height:0;overflow:hidden;padding:12px 14px;justify-content:center;gap:14px}
+.stage .start{font-size:18px;padding:16px}
+.fig{margin-top:0}
+.scene{position:relative;display:flex;flex-direction:column;align-items:center}
+.scene .pet.sm{position:absolute;right:-24px;bottom:6px;width:100px;height:86px}
+.dock{position:relative;flex:none}
+.sheet{height:42vh;max-height:none}
+.app.open .start{font-size:12px;padding:8px}
+.app.open .fig,.app.open .fig img{width:84px}
+.app.open .fig .pfp{left:21px;width:42px;height:42px}
+.app.open .plat{width:170px;height:36px;margin-top:-20px}
+.app.open .scene .pet.sm{width:72px;height:62px;right:-10px}
+.pp{display:grid;grid-template-columns:40% 1fr;gap:10px}
+.pbox{border:4px solid var(--a1);border-radius:18px;background:var(--card);padding:6px;margin-bottom:6px}
+.pbox .pet{width:100%;height:auto;margin:0}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-content:start}
+.fb{display:block;background:var(--a1);color:#000;border:4px solid #000;box-shadow:3px 3px 0 #000;padding:10px;cursor:pointer;text-align:center;margin:4px 0 10px}
+.big{font-size:36px;text-align:center;margin:8px 0}
+.list{border:4px solid var(--a1);height:44vh;overflow:auto;padding:8px;background:var(--card)}
+.ex{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:4px solid var(--bg);padding:8px 4px}
+.ex.done b{opacity:.5;text-decoration:line-through}
+.ck{width:44px;height:44px;flex:none;border-radius:50%;background:var(--bg);color:#000;border:4px solid var(--a1);padding:0;box-shadow:none;font-size:14px}
+.ex.done .ck{background:var(--a2)}
+.plan{cursor:pointer;text-decoration:underline;text-align:center}
+.hud{width:100%;max-width:340px}
+.app.open .hud{display:none}
+body.crt::after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0 2px,#0003 2px 3px);z-index:20}
+.pet.hop{animation:hop .5s steps(4)}
+@keyframes hop{50%{transform:translateY(-22px)}}
+.cf{position:fixed;top:-10px;width:8px;height:8px;z-index:30;animation:fall 1.6s steps(12) forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(105vh)}}
+.pg{max-width:480px;margin:0 auto;padding-bottom:86px}
+.hint{text-align:center;font-size:8px;color:var(--a1);margin:16px 0 4px}
+.sc{display:grid;grid-template-columns:1fr 120px 1fr;align-items:end;gap:6px;padding:0 10px}
+.desk,.sign{background:none;border:0;box-shadow:none;color:var(--text);padding:4px;font-size:8px;text-align:center}
+.desk img{border-bottom:4px solid var(--a1);padding-bottom:2px}
+.sign .bd{background:var(--a1);color:#000;border:4px solid #000;padding:10px 4px;font-size:11px}
+.sign .po{width:8px;height:46px;background:var(--a1);border:2px solid #000;margin:0 auto}
+.sign .pl{font-size:7px;color:var(--a2);margin-top:4px;text-decoration:underline}
+.pg .plat{margin:-26px auto 0}
+.hud2{padding:12px 16px}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 12px;border:4px solid var(--a1);padding:10px;background:var(--card)}
+.shop{border:4px solid var(--a1);background:var(--bg);display:flex;flex-direction:column;height:310px}
+.shop .li{overflow:auto;flex:1;padding:4px 6px}
+.sr{display:flex;justify-content:space-between;align-items:center;gap:6px;border-bottom:2px solid var(--a1);padding:6px 0}
+.sheet2{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom,0px));height:55vh;overflow:auto;background:var(--bg);border-top:4px solid var(--a1);padding:12px;z-index:5}
+.sheet2 .x{float:right;font-size:8px;padding:4px 8px}
+.tabs2{position:fixed;left:0;right:0;bottom:0;display:flex;gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));background:#000;z-index:6}
+.tabs2 button{flex:1;font-size:8px}
+.page{position:fixed;inset:0;background:var(--bg);z-index:8;overflow:auto;padding:14px 14px 30px}
+.sw1{width:34px;height:34px;padding:0}
+.lg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.lc{aspect-ratio:1;background:var(--bg);border:3px solid var(--a1)}.lc.w{background:var(--a2)}.lc.r{background:var(--a1)}
+.plat.grass{background:#2e7d32;border-color:#8bc34a}.plat.space{background:#1a1040;border-color:#7e57c2}.plat.lava{background:#5a1a0a;border-color:#ff6d00}
+.rep{width:54px;margin:0;padding:6px;font-size:9px}
+.bossc{margin:12px 12px 0;border:4px solid var(--a1);background:var(--card);padding:8px;display:flex;gap:10px;align-items:center}
+.bossc img{width:56px;image-rendering:pixelated;flex:none}.bossc>div{flex:1}
+.chart{width:100%;background:var(--bg);border:4px solid var(--a1)}.chart polyline{fill:none;stroke:var(--a2);stroke-width:2}.chart circle{fill:var(--a1)}
+.plat.gold{background:#7a5c00;border-color:#ffd54f}
+</style></head><body>
+<div id="app"></div><div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>window.FQ_CONFIG={url:"",key:""}; // paste your Supabase URL + anon key here</script>
+<script>
+const $=q=>document.querySelector(q),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const CFG=window.FQ_CONFIG,sb=CFG.url&&window.supabase?supabase.createClient(CFG.url,CFG.key):null;
+const dk=(d=new Date())=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const gap=(a,b)=>Math.round((new Date(a)-new Date(b))/864e5);
+const age=s=>{const[y,m,d]=s.split("-").map(Number),n=new Date();let a=n.getFullYear()-y;if(n<new Date(n.getFullYear(),m-1,d))a--;return a};
+const THEMES={Graphite:["#16171a","#23252a","#e6e6e6","#8d99ae","#edf2f4"],Ember:["#1a0f0a","#2b1a12","#f5e6dc","#ff6b35","#ffb84d"],Moss:["#0f1a12","#1b2b20","#e2f0e4","#6bbf59","#c9e265"],Slate:["#151b24","#212b38","#e3eaf3","#5b8def","#9fc3ff"],Bone:["#efe9dc","#fbf7ec","#2a261f","#8a6f4e","#c2410c"],Ultraviolet:["#130d22","#221838","#efe6ff","#9d5cff","#ff5ccf"],Rust:["#1d120e","#2f1d16","#f1dfd3","#b7410e","#e0a458"],Midnight:["#05070f","#0e1424","#dfe7ff","#3b82f6","#22d3ee"]};
+const BASE={
+quad:["..a......a..","..aa....aa..","..aaaaaaaa..","..aeaaaaea..","..abbbbbba..","aaaaaaaaaaaa","aabaaaaaabaa","aa.aa..aa.aa","bb.bb..bb.bb"],
+bird:["....aaaa....","...aaaaaa...","...aeaaea...","...aabbaa...","..aaaabaaa..",".aaaaaaaaaa.","aaabaaaabaaa",".aaaaaaaaaa.","...a....a...","..bb....bb.."],
+blob:["....aaaa....","..aaaaaaaa..",".aaaaaaaaaa.",".aeaaaaaaea.","aaaaaaaaaaaa","aabaaaaaabaa","aaaabbbbaaaa",".aaaaaaaaaa.","..aaaaaaaa..","...bb..bb..."],
+snake:["...aaaa.....","..aeaaea....","..aaaaaa....","...abba.....","....aaa.....","...aaaaaa...","..aabaaaaa..","...aaaaaaa..","....bbbbaa..","......aaa..."]};
+// id,name,base,c1,c2,type(s=starter,l=level,k=best streak),n
+const PETS=[["wolf","Wolf Pup","quad","#8d99ae","#e5e7eb","s"],["fox","Fox","quad","#e8742a","#f6e3c4","s"],["cat","Cat","quad","#c9a06b","#6b4b2a","s"],["frog","Frog","blob","#4caf50","#c8e6a0","s"],["turtle","Turtle","blob","#2e8b57","#c2a35c","s"],["hawk","Hawk","bird","#8b5a2b","#f2d16b","s"],["raccoon","Raccoon","quad","#6b6f78","#25272b","s"],["lizard","Lizard","snake","#7cb342","#f4d35e","s"],
+["bear","Bear","quad","#6d4c41","#a1887f","l",3],["panther","Panther","quad","#212121","#5c6bc0","l",4],["boar","Boar","quad","#7b5e57","#d7ccc8","l",5],["axolotl","Axolotl","blob","#f4a6c0","#e86a92","l",6],["owl","Owl","bird","#9c7b54","#e8d9b5","l",7],["snake","Snake","snake","#3f7d3f","#d9d15c","l",8],["mantis","Mantis","snake","#8bc34a","#33691e","l",9],["ram","Ram","quad","#d7ccc8","#8d6e63","l",10],["crow","Crow","bird","#1c1c28","#6a6a8a","l",11],["gecko","Gecko","snake","#26a69a","#ffd54f","l",12],
+["golem","Stone Golem","blob","#757575","#a1887f","k",14],["dragon","Dragon","snake","#c62828","#ffb300","k",30],["phoenix","Phoenix","bird","#ff6d00","#ffd600","k",30],["kraken","Kraken","blob","#5e35b1","#b39ddb","k",21],["yeti","Yeti","quad","#e3f2fd","#90caf9","k",21],["stag","Thunder Stag","quad","#ffd54f","#5d4037","k",45],["shadow","Shadow Wolf","quad","#1a1033","#7e57c2","k",60],["basilisk","Basilisk","snake","#2e7d32","#ff7043","k",100]];
+// id,name,unit,goal,step,xp per unit
+const EX=[["pu","Push-ups","reps",20,5,3],["sq","Squats","reps",40,10,1.5],["pl","Pull-ups / rows","reps",8,2,6],["lr","Leg raises","reps",15,5,2],["pk","Plank","sec",60,15,.5]];
+const MIN=["mn","2-minute minimum","min",2,1,10];
+const FOOD=[["Snack",10,15],["Meal",25,40],["Feast",60,100]];
+const defS=()=>({xp:0,coins:0,hunger:80,t:Date.now(),streak:0,best:0,shields:1,lastDay:"",days:{},bonus:{},pet:"wolf",theme:{n:"Graphite",c:THEMES.Graphite.slice()},wk:null});
+let P=null,S=defS(),UID=null,tab="home",mode="signup",step=1,F={pet:"wolf"},err="",rest=0,WL=null,tmr;
+const need=l=>100+(l-1)*60,day=()=>S.days[dk()]||(S.days[dk()]={});
+function lvl(){let l=1,x=S.xp;while(x>=need(l)){x-=need(l);l++}return{l,x,n:need(l)}}
+const unlocked=p=>p[5]=="s"||(p[5]=="l"&&lvl().l>=p[6])||(p[5]=="k"&&S.best>=p[6]);
+const req=p=>p[5]=="l"?"LV "+p[6]:"STREAK "+p[6];
+function sprite(p,st,a1){const g=BASE[p[2]],c=document.createElement("canvas");c.width=14;c.height=12;const x=c.getContext("2d");
+const f=(i,j)=>g[j]&&g[j][i]&&g[j][i]!==".";
+if(st>=3){x.fillStyle=a1;for(let j=-1;j<=10;j++)for(let i=-1;i<=12;i++)if(!f(i,j)&&(f(i+1,j)||f(i-1,j)||f(i,j+1)||f(i,j-1)))x.fillRect(i+1,j+1,1,1)}
+g.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==".")return;x.fillStyle=ch=="a"?p[3]:ch=="b"?p[4]:"#111";x.fillRect(i+1,j+1,1,1)}));
+if(st>=2){x.fillStyle="#ffd54f";x.fillRect(6,0,2,1)}
+if(st>=4){x.fillStyle="#fff";[[0,2],[13,1],[1,10],[12,9]].forEach(([i,j])=>x.fillRect(i,j,1,1))}
+return c.toDataURL()}
+const stage=()=>{const x=(S.pp||{}).xp||0;return x>=1500?4:x>=600?3:x>=200?2:1};
+const pet=id=>PETS.find(p=>p[0]==id)||PETS[0];
+function toast(t){const e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",1800)}
+function apply(){const v=["--bg","--card","--text","--a1","--a2"];S.theme.c.forEach((c,i)=>document.documentElement.style.setProperty(v[i],c))}
+let st;function save(){try{localStorage.setItem("ip.v1",JSON.stringify({P,S}))}catch(e){}
+ if(sb&&UID){clearTimeout(st);st=setTimeout(()=>sb.from("game_state").upsert({user_id:UID,state:S}),800)}}
+function rollover(){const t=dk();if(S.lastDay&&S.streak){const g=gap(t,S.lastDay);if(g==2&&S.shields>0){S.shields--;S.lastDay=dk(new Date(Date.now()-864e5));toast("Streak shield used")}else if(g>1)S.streak=0}
+ const n=Date.now();S.hunger=Math.max(0,S.hunger-(n-S.t)/36e5*4);S.t=n}
+function checkDay(){const t=dk(),d=day(),all=EX.every(e=>(d[e[0]]||0)>=e[3]);
+ if((all||(d.mn||0)>=2||EX.some(e=>(d[e[0]]||0)>=e[3]))&&S.lastDay!==t){S.streak=S.lastDay&&gap(t,S.lastDay)==1?S.streak+1:1;S.lastDay=t;S.best=Math.max(S.best,S.streak);if(S.streak%7==0&&S.shields<3){S.shields++;toast("Streak shield earned")}}
+ if(all&&!S.bonus[t]){S.bonus[t]=1;S.xp+=50;S.coins+=25;toast("ALL QUESTS! +50 XP")}}
+function add(id,dir){const q=[...EX,MIN].find(e=>e[0]==id),d=day(),lv=lvl().l,cur=d[id]||0,nv=Math.max(0,cur+dir*q[4]),dl=nv-cur;if(!dl)return;d[id]=nv;
+ const g=Math.round(dl*q[5]);S.xp=Math.max(0,S.xp+g);S.coins=Math.max(0,S.coins+Math.round(g/2));
+ if(dir>0)toast("+"+g+" XP  +"+Math.round(g/2)+" COINS");checkDay();if(lvl().l>lv)toast("LEVEL "+lvl().l+"!");save();render()}
+const fmt=s=>Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
+function tickUI(){const a=$("#wt"),b=$("#rt");if(a&&S.wk)a.textContent=fmt((Date.now()-S.wk)/1e3);if(b){const r=Math.max(0,(rest-Date.now())/1e3);b.textContent=r>0?"REST "+fmt(r):"REST: OFF"}}
+function questHTML(e){const v=(day()[e[0]]||0),done=v>=e[3];return `<div class="c q ${done?"done":""}"><div class="r"><b>${e[1]}</b><span class="m">${v}/${e[3]} ${e[2]}${done?" OK":""}</span></div><div class="bar"><i style="width:${Math.min(100,v/e[3]*100)}%"></i></div><div class="r"><button class="g" data-a="add" data-i="${e[0]}" data-d="-1">-</button><button style="flex:1" data-a="add" data-i="${e[0]}" data-d="1">+${e[4]} ${e[2]}</button></div></div>`}
+function authHTML(){const sg=mode=="signup";let h=`<main><h1>FORGE</h1><p class="m" style="text-align:center">${sb?"":"DEMO MODE: no Supabase keys, data stays on this device"}</p><div class="c">`;
+ const inp=(k,l,t="text")=>`<label>${l}</label><input data-k="${k}" type="${t}" value="${esc(F[k])}" autocomplete="off">`;
+ if(!sg)h+=`<h2>LOG IN</h2>${inp("email","EMAIL","email")}${inp("password","PASSWORD","password")}<button data-a="login">START</button> <button class="g" data-a="mode">NEW GAME</button>`;
+ else if(step==1)h+=`<h2>CREATE HERO 1/3</h2>${inp("first","FIRST NAME")}${inp("last","LAST NAME")}${inp("dob","DATE OF BIRTH","date")}${inp("email","EMAIL","email")}<button data-a="next">NEXT</button> ${sb?`<button class="g" data-a="mode">LOG IN</button>`:""}`;
+ else if(step==2)h+=`<h2>ACCOUNT 2/3</h2>${inp("user","USERNAME")}${inp("pref","PREFERRED NAME")}${inp("password","PASSWORD (8+)","password")}<button class="g" data-a="back">BACK</button> <button data-a="next">NEXT</button>`;
+ else h+=`<h2>PICK STARTER 3/3</h2><div class="grid">${PETS.filter(p=>p[5]=="s").map(p=>`<button class="pk ${F.pet==p[0]?"sel":""}" data-a="pick" data-i="${p[0]}"><img src="${sprite(p,1,"#fff")}"><br>${p[1]}</button>`).join("")}</div><br><label>COLOR PRESET</label><div class="sw">${Object.keys(THEMES).map(n=>`<button data-a="preset" data-i="${n}">${n}</button>`).join("")}</div><br><button class="g" data-a="back">BACK</button> <button data-a="signup">BEGIN</button>`;
+ return h+(err?`<div class="err">${esc(err)}</div>`:"")+`</div></main>`}
+function homeHTML(){const L=lvl();let h=`<div class="c"><div class="r"><b>${esc(P.pref)}</b><span class="m">LV ${L.l}</span></div><div class="bar"><i style="width:${L.x/L.n*100}%"></i></div><div class="r m"><span>${L.x}/${L.n} XP</span><span>STREAK ${S.streak}</span><span>SHIELD ${S.shields}</span><span>${S.coins}c</span></div></div>`;
+ h+=S.wk?`<div class="c lock"><h2>WORKOUT ACTIVE</h2><div id="wt" style="font-size:20px;margin:8px">0:00</div><div id="rt" class="m">REST: OFF</div><div class="r" style="margin:10px 0"><button data-a="rest" data-i="30">30s</button><button data-a="rest" data-i="60">60s</button><button data-a="rest" data-i="90">90s</button></div><button data-a="end">FINISH</button> <button class="g" data-a="bail">BAIL OUT</button><p class="m">Other tabs are locked until you finish. Bailing costs your pet 20 food.</p></div>`:`<button style="width:100%;margin-bottom:14px" data-a="start">START WORKOUT</button>`;
+ return h+EX.map(questHTML).join("")+`<h2>MINIMUM DAY</h2>`+questHTML(MIN)+`<p class="m">Finish all 5 quests for +50 XP. A 2-minute minimum keeps your streak alive.</p>`}
+function petHTML(){const p=pet(S.pet),m=S.hunger>50?"happy":S.hunger>20?"hungry":"critical",awake=Object.values(day()).some(v=>v>0);
+ let h=`<div class="c"><h2>${p[1].toUpperCase()}</h2><img class="pet ${m} ${awake?"":"dim"}" src="${sprite(p,stage(),S.theme.c[4])}"><div class="m" style="text-align:center">${awake?"MOOD: "+m.toUpperCase():"ZZZ... DO A QUEST TO WAKE IT"} | FORM ${stage()}/4</div><label>FOOD</label><div class="bar h"><i style="width:${S.hunger}%"></i></div>`;
+ h+=`<div class="r">${FOOD.map(f=>`<button data-a="feed" data-i="${f[0]}" ${S.coins<f[1]?"disabled":""}>${f[0]}<br>${f[1]}c</button>`).join("")}</div></div><div class="c"><h2>PET ROSTER</h2><div class="grid">`;
+ h+=PETS.map(q=>{const u=unlocked(q);return `<button class="pk ${S.pet==q[0]?"sel":""} ${u?"":"lk"}" ${u?`data-a="selpet" data-i="${q[0]}"`:"disabled"}><img src="${sprite(q,u?1:1,"#fff")}"><br>${u?q[1]:req(q)}</button>`}).join("")+`</div></div>`;return h}
+function styleHTML(){return `<div class="c"><h2>THEME</h2><div class="sw">${Object.keys(THEMES).map(n=>`<button data-a="preset" data-i="${n}">${n}</button>`).join("")}</div><br>${["BACKGROUND","CARDS","TEXT","ACCENT","ACCENT 2"].map((n,i)=>`<label>${n}</label><input type="color" data-c="${i}" value="${S.theme.c[i]}">`).join("")}</div><div class="c"><h2>PROFILE</h2><p class="m">${esc(P.first)} ${esc(P.last)}<br>@${esc(P.user)}<br>${esc(P.tier=="adult"?"18+":"14-17")}</p><button class="g" data-a="logout">LOG OUT</button></div>`}
+function render(){const a=$("#app");if(!P){a.innerHTML=authHTML();return}
+ const lk=!!S.wk,t=lk?"home":tab,tabs=[["home","QUESTS"],["pet","PET"],["style","STYLE"]];
+ a.innerHTML=`<main>${t=="home"?homeHTML():t=="pet"?petHTML():styleHTML()}</main><div class="nav">${tabs.map(x=>`<button class="${t==x[0]?"":"g"}" data-a="tab" data-i="${x[0]}" ${lk&&x[0]!="home"?"disabled":""}>${lk&&x[0]!="home"?"LOCKED":x[1]}</button>`).join("")}</div>`}
+BASE.fish=["....aa......","...aaaa..bb.",".aaaaaaabbbb","aeaaaaaaabbb","abaaaaaaaabb",".aaaaaaabbbb","..aaaaaa.bb.","....aa......"];
+BASE.bug=["..b......b..","...b....b...","....aaaa....","...aeaaea...","..aaaaaaaa..",".baaaaaaaab.","b.aabaabaa.b","..aaaaaaaa..",".b..b..b..b.","b..........b"];
+PETS.push(["pig","Pig","quad","#f4a6b8","#c26a7e","s"],["duck","Duck","bird","#ffd54f","#ff8f00","s"],["bunny","Bunny","quad","#eeeeee","#f8bbd0","s"],["hamster","Hamster","blob","#e0a85c","#fff3e0","s"],["koi","Koi","fish","#ff7043","#fff3e0","s"],["beetle","Beetle","bug","#3949ab","#90caf9","s"],["slime","Slime","blob","#69f0ae","#00c853","s"],["sloth","Sloth","quad","#8d6e63","#d7ccc8","s"],
+["shark","Shark","fish","#607d8b","#eceff1","l",13],["moose","Moose","quad","#5d4037","#bcaaa4","l",14],["tiger","Tiger","quad","#ff9800","#212121","l",15],["eagle","Eagle","bird","#5d4037","#ffffff","l",16],["cobra","Cobra","snake","#827717","#212121","l",17],["scorpion","Scorpion","bug","#bf360c","#ffcc80","l",18],["gator","Gator","snake","#33691e","#aed581","l",19],["rhino","Rhino","quad","#78909c","#cfd8dc","l",20],["orca","Orca","fish","#212121","#fafafa","l",22],["wasp","Wasp","bug","#fdd835","#212121","l",24],["lynx","Lynx","quad","#a1887f","#3e2723","l",26],["capybara","Capybara","quad","#a67c52","#6d4c41","l",28],
+["griffin","Griffin","bird","#d4a017","#8d6e63","k",75],["wyvern","Wyvern","snake","#455a64","#ff5252","k",90],["hydra","Hydra","snake","#00695c","#b2dfdb","k",120],["cerberus","Cerberus","quad","#3e2723","#ff3d00","k",150],["leviathan","Leviathan","fish","#1a237e","#7986cb","k",180],["titan","Titan","blob","#4a148c","#ffd740","k",200]);
+let ui={p:null,m:0,s:0,b:1};
+const ls=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast("Storage full")}};
+let PICS=ls("fg.pics",[]),PFP=ls("fg.pfp","");
+const FIG=["...hhhh...","..hhhhhh..","..hehheh..","..hhhhhh..","...hhhh...","..tttttt..",".tttttttt.","htttttttth","h.tttttt.h","..pppppp..","..pp..pp..","..pp..pp..","..ss..ss.."];
+function figure(){const c=document.createElement("canvas");c.width=10;c.height=13;const x=c.getContext("2d"),t=S.theme.c;FIG.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==".")return;x.fillStyle={h:"#f1c9a0",e:"#111",t:t[3],p:t[4],s:"#111"}[ch];x.fillRect(i,j,1,1)}));return c.toDataURL()}
+function shrink(file,max,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*k;c.height=im.height*k;c.getContext("2d").drawImage(im,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.6))};im.onerror=()=>toast("Could not read that image");im.src=r.result};r.onerror=()=>toast("Could not read that file");r.readAsDataURL(file)}
+function stageHTML(){const p=pet(S.pet),m=S.hunger>50?"happy":S.hunger>20?"hungry":"critical";return `<div class="stage"><div class="hud">${hud()}</div><button class="start" data-a="begin">${plan()[dow()]=="rest"?"CHECK IN":"START"}</button><div class="m plan" data-a="pickday" data-i="${dow()}">TODAY: ${planName(dow())} | TAP TO CHANGE</div><div class="scene"><div class="fig"><img src="${figure()}">${PFP?`<img class="pfp" src="${PFP}">`:""}</div><div class="plat"></div><img class="pet sm ${m}" src="${sprite(p,stage(),S.theme.c[4])}" data-a="pet2"></div><div class="m pn">${esc(p[1])} | FOOD ${Math.round(S.hunger)}%<br>STREAK ${S.streak}</div></div>`}
+function themeHTML(){return `<div class="c"><h2>PRESETS</h2><div class="sw">${Object.keys(THEMES).map(n=>`<button data-a="preset" data-i="${n}">${n}</button>`).join("")}</div></div><div class="c"><h2>COLORS</h2>${["BACKGROUND","CARDS","TEXT","ACCENT","ACCENT 2"].map((n,i)=>`<label>${n}</label><input type="color" data-c="${i}" value="${S.theme.c[i]}">`).join("")}</div>`}
+function picHTML(){const f=PICS[0],l=PICS[PICS.length-1];return `<div class="c"><h2>PROGRESS PICS</h2><p class="m">Private. Saved on this device only for now.</p><label>TYPE</label><select id="pl"><option>BEFORE</option><option>PROGRESS</option><option>AFTER</option></select><label class="fb">CHOOSE PHOTO<input type="file" accept="image/*" data-f="pic" hidden></label></div>`+(PICS.length>1?`<div class="c"><h2>THEN VS NOW</h2><div class="grid" style="grid-template-columns:1fr 1fr"><div class="pk"><img src="${f.u}"><br>${f.d}</div><div class="pk"><img src="${l.u}"><br>${l.d}</div></div></div>`:"")+`<div class="grid">${PICS.map((q,i)=>`<div class="pk"><img src="${q.u}"><br>${esc(q.l)}<br>${q.d}<br><button class="g" data-a="delpic" data-i="${i}">DEL</button></div>`).join("")}</div>`}
+function userHTML(){const L=lvl();return `<div class="c"><h2>${esc(P.pref)}</h2><p class="m">${esc(P.first)} ${esc(P.last)} | @${esc(P.user)} | ${P.tier=="adult"?"18+":"14-17"}</p><label>PROFILE PIC (YOUR HEAD)</label><label class="fb">CHOOSE PIC<input type="file" accept="image/*" data-f="pfp" hidden></label>${PFP?`<button class="g" data-a="rmpfp">REMOVE PIC</button>`:""}</div><div class="c"><h2>STATS</h2><p class="m">LEVEL ${L.l} | XP ${S.xp}<br>STREAK ${S.streak} | BEST ${S.best}<br>SHIELDS ${S.shields}/3 | COINS ${S.coins}</p></div>`}
+function sheet(){const t={pet:"PET",cust:"CUSTOMIZE",pic:"PICS",user:"USER"}[ui.p];return (ui.p=="pet"?petHTML():ui.p=="cust"?themeHTML():ui.p=="pic"?picHTML():userHTML())}
+function barHTML(){const T=[["pet","PET"],["cust","CUSTOM"],["pic","PIC"],["user","USER"]];return `<div class="dock"><button class="tg" data-a="bar">${ui.b?"▼":"▲"}</button>${ui.b?`<div class="nav2">${T.map(t=>`<button class="${ui.p==t[0]?"":"g"}" data-a="panel" data-i="${t[0]}">${t[1]}</button>`).join("")}</div>`:""}${ui.p&&ui.b?`<div class="sheet">${sheet()}</div>`:""}</div>`}
+function drawer(){const L=lvl(),d=day();return `<div class="scrim" data-a="menu"></div><div class="drawer"><h2>TODAY</h2><p class="m">LV ${L.l} | ${L.x}/${L.n} XP<br>STREAK ${S.streak} | SHIELDS ${S.shields}</p>${[...EX,MIN].map(e=>{const v=d[e[0]]||0;return `<div class="m">${e[1]} ${v}/${e[3]} ${v>=e[3]?"OK":""}</div><div class="bar"><i style="width:${Math.min(100,v/e[3]*100)}%"></i></div>`}).join("")}<p class="m">Tap START to log your quests.</p></div>`}
+function settings(){return `<div class="scrim" data-a="close"></div><div class="c modal"><h2>SETTINGS</h2><p class="m">Notifications coming soon.</p><button class="g" data-a="logout">LOG OUT</button> <button data-a="close">CLOSE</button></div>`}
+function render(){document.body.classList.toggle("crt",!!S.crt);const a=$("#app");if(!P){ui={p:null,m:0,s:0,b:1};a.innerHTML=authHTML();return}
+ if(S.wk&&S.wo){a.innerHTML=workoutHTML();return}
+ a.innerHTML=`<div class="app ${ui.p&&ui.b?"open":""}"><div class="top"><button class="g" data-a="menu">≡</button><b>@${esc(P.user)}</b><button class="g" data-a="gear">⚙</button></div>${stageHTML()}${ui.m?drawer():""}${ui.s?settings():""}${ui.pk!=null?pickModal():""}${barHTML()}</div>`}
+function petHTML(){const p=pet(S.pet),m=S.hunger>50?"happy":S.hunger>20?"hungry":"critical",aw=Object.values(day()).some(v=>v>0);
+return `<div class="pp"><div><h2>${esc(p[1]).toUpperCase()}</h2><div class="pbox"><img class="pet ${m} ${aw?"":"dim"}" src="${sprite(p,stage(),S.theme.c[4])}"></div><div class="m">${aw?m.toUpperCase():"ZZZ"} | FORM ${stage()}/4 | ${S.coins}c</div><div class="bar h"><i style="width:${S.hunger}%"></i></div>${FOOD.map(f=>`<button style="width:100%;margin-bottom:6px;font-size:8px" data-a="feed" data-i="${f[0]}" ${S.coins<f[1]?"disabled":""}>${f[0]} ${f[1]}c</button>`).join("")}</div><div class="pgrid">${PETS.map(q=>{const u=unlocked(q);return `<button class="pk ${S.pet==q[0]?"sel":""} ${u?"":"lk"}" ${u?`data-a="selpet" data-i="${q[0]}"`:"disabled"}><img src="${sprite(q,1,"#fff")}"><br>${u?q[1]:req(q)}</button>`}).join("")}</div></div>`}
+const DAYS=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"],dow=()=>new Date().getDay();
+const WO=[
+{id:"push",name:"Push Day",focus:"CHEST SHOULDERS TRICEPS",ex:[["Arm circles + wrist rolls","1 x 30s","Warm-up. Slow and big."],["Scapular push-ups","2 x 10","Warm-up. Arms straight, move only the shoulder blades."],["Push-ups","4 x 12","Chest to floor, body one straight line."],["Pike push-ups","3 x 8","Hips high, head between your arms."],["Diamond push-ups","3 x 8","Hands under chest, elbows close."],["Chair dips","3 x 12","Elbows back, shoulders down."],["Plank shoulder taps","3 x 20","Hips stay still."],["Chest stretch","2 x 30s","Cool-down. Hand on a wall, turn away."]]},
+{id:"pull",name:"Pull Day",focus:"BACK BICEPS GRIP",ex:[["Shoulder rolls + cat-cow","1 x 10","Warm-up."],["Scapular pulls","2 x 8","Hang from a bar, pull shoulder blades down only."],["Pull-ups (or negatives)","4 x 6","Chin over bar. No bar? Do table rows."],["Inverted rows","3 x 10","Under a sturdy table or low bar, body straight."],["Chin-ups or negatives","3 x 5","Palms toward you, 3 seconds down."],["Superman holds","3 x 20s","Lift arms and legs, squeeze your back."],["Dead hang","3 x 30s","Stay active in the shoulders."],["Lat stretch","2 x 30s","Cool-down. Hold a doorframe and sit back."]]},
+{id:"legs",name:"Leg Day",focus:"QUADS GLUTES CALVES",ex:[["Leg swings","1 x 10 each","Warm-up."],["Bodyweight squats","2 x 15","Warm-up. Heels down, chest up."],["Bulgarian split squats","3 x 10 each","Back foot on a chair."],["Jump squats","3 x 12","Land softly."],["Reverse lunges","3 x 12 each","Back knee taps the floor lightly."],["Glute bridges","3 x 15","Squeeze at the top."],["Calf raises","4 x 20","Full range, pause at the top."],["Wall sit","2 x 45s","Thighs parallel to the floor."],["Hamstring stretch","2 x 30s","Cool-down."]]},
+{id:"core",name:"Core Day",focus:"ABS OBLIQUES LOWER BACK",ex:[["Dead bug","3 x 10","Low back stays on the floor."],["Plank","3 x 45s","Squeeze glutes."],["Leg raises","3 x 12","Slow, no swinging."],["Hollow body hold","3 x 25s","Ribs down, lower back pressed into the floor."],["Russian twists","3 x 20","Touch the floor each side."],["Mountain climbers","3 x 30s","Fast but flat back."],["Side plank","2 x 30s each","Hips high."],["Cobra stretch","2 x 30s","Cool-down."]]},
+{id:"full",name:"Full Body",focus:"EVERYTHING",ex:[["Jumping jacks","1 x 60s","Warm-up."],["Push-ups","3 x 10","Body in one line."],["Squats","3 x 20","Heels down."],["Inverted rows or pull-ups","3 x 8","Pull chest to the bar."],["Reverse lunges","3 x 10 each","Control the way down."],["Plank","3 x 40s","Squeeze glutes."],["Burpees","3 x 8","Smooth, not rushed."],["Stretch flow","1 x 2 min","Cool-down. Hips, hamstrings, shoulders."]]},
+{id:"cardio",name:"Cardio HIIT",focus:"CONDITIONING",ex:[["Jog in place","1 x 2 min","Warm-up."],["High knees","4 x 40s","20s rest between rounds."],["Burpees","4 x 40s","20s rest."],["Jump squats","4 x 40s","20s rest."],["Mountain climbers","4 x 40s","20s rest."],["Skater hops","4 x 40s","20s rest."],["Jumping jacks","4 x 40s","20s rest."],["Walk it out","1 x 3 min","Cool-down. Slow your breathing."]]},
+{id:"skills",name:"Skills + Mobility",focus:"HANDSTAND L-SIT FLEXIBILITY",ex:[["Wrist prep","2 x 10","Warm-up. Circles and rocks on all fours."],["Wall handstand hold","5 x 20s","Belly to the wall, push tall."],["L-sit (floor or chairs)","5 x 10s","Press down, legs straight if you can."],["Pistol squat progression","3 x 5 each","Hold a doorframe if needed."],["Deep squat hold","3 x 45s","Heels down, elbows push knees out."],["Hip openers (90/90)","2 x 10 each","Slow switches."],["Hamstring or pancake stretch","2 x 40s","Cool-down."]]}];
+const plan=()=>{syncCW();return S.plan||(S.plan={0:"rest",1:"push",2:"pull",3:"legs",4:"rest",5:"core",6:"full"})};
+const planName=d=>{const id=plan()[d];return id=="rest"?"REST":id?(WO.find(x=>x.id==id)||{name:"PICK ONE"}).name.toUpperCase():"PICK ONE"};
+function credit(){const t=dk();if(S.lastDay!==t){S.streak=S.lastDay&&gap(t,S.lastDay)==1?S.streak+1:1;S.lastDay=t;S.best=Math.max(S.best,S.streak);if(S.streak%7==0&&S.shields<3){S.shields++;toast("Streak shield earned")}}}
+function endWk(){S.wk=null;S.wo=null;try{WL&&WL.release()}catch(e){}}
+async function begin(){const id=plan()[dow()];if(!id){ui.pk=dow();render();return}
+ if(id=="rest"){if(day().rest){toast("Already checked in");return}day().rest=1;credit();S.xp+=10;toast("Rest day logged +10 XP");save();render();return}
+ const w=WO.find(x=>x.id==id);S.wo={id,done:w.ex.map(()=>false),dur:30};S.wk=Date.now();try{WL=await navigator.wakeLock.request("screen")}catch(e){}save();render()}
+function finish(){const w=WO.find(x=>x.id==S.wo.id),n=w.ex.length,c=S.wo.done.filter(Boolean).length,lv=lvl().l,xp=c*12+(c==n?30:0);S.xp+=xp;S.coins+=Math.round(xp/2);
+ if(c>=Math.ceil(n/2)){credit();toast("Workout done +"+xp+" XP")}else toast("+"+xp+" XP. Do half next time to keep your streak");
+ endWk();if(c==n||lvl().l>lv)confetti();if(lvl().l>lv)setTimeout(()=>toast("LEVEL "+lvl().l+"!"),1900)}
+function tickUI(){const a=$("#wt");if(a&&S.wk&&S.wo){const r=Math.max(0,S.wo.dur*60-(Date.now()-S.wk)/1e3);a.textContent=fmt(r);if(r<=0&&!S.wo.alarm){S.wo.alarm=1;toast("TIME UP");try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}}}
+function workoutHTML(){const w=WO.find(x=>x.id==S.wo.id),dn=S.wo.done,c=dn.filter(Boolean).length,r=Math.max(0,S.wo.dur*60-(Date.now()-S.wk)/1e3);
+return `<main><div class="r"><button class="g" data-a="bail2">&lt;</button><span class="m">${w.name.toUpperCase()} | ${c}/${w.ex.length}</span></div><h2 style="text-align:center;margin-top:12px">TIMER</h2><div id="wt" class="big">${fmt(r)}</div><p class="m" style="text-align:center">30 MINS DEFAULT</p><div class="r">${[15,30,45,60].map(m=>`<button class="${S.wo.dur==m?"":"g"}" data-a="dur" data-i="${m}">${m}m</button>`).join("")}</div><div style="text-align:center;margin:12px"><button class="g" data-a="bail2">BAIL</button></div><div class="list">${w.ex.map((e,i)=>`<div class="ex ${dn[i]?"done":""}"><div><b>${e[0]}</b><div class="m">${e[1]}</div><div class="m">${e[2]}</div></div><button class="ck" data-a="chk" data-i="${i}">${dn[i]?"\u2713":""}</button></div>`).join("")}</div><p class="m">Rest 60-90s between sets. Everything else is locked until you finish.</p><button style="width:100%" data-a="finish">FINISH WORKOUT</button></main>`}
+function pickModal(){const d=ui.pk;return `<div class="scrim" data-a="closepk"></div><div class="c modal" style="top:10%;max-height:75vh;overflow:auto"><h2>${DAYS[d]}</h2>${WO.map(w=>`<button class="${plan()[d]==w.id?"":"g"}" style="width:100%;margin-bottom:6px;text-align:left;font-size:8px" data-a="setplan" data-i="${w.id}">${w.name} | ${w.ex.length} MOVES</button>`).join("")}<button class="${plan()[d]=="rest"?"":"g"}" style="width:100%;font-size:8px" data-a="setplan" data-i="rest">REST DAY</button></div>`}
+function drawer(){const L=lvl(),td=dow();return `<div class="scrim" data-a="menu"></div><div class="drawer"><h2>WEEK PLAN</h2><p class="m">LV ${L.l} | STREAK ${S.streak} | SHIELDS ${S.shields}</p>${[1,2,3,4,5,6,0].map(d=>`<button class="${d==td?"":"g"}" style="width:100%;margin-bottom:6px;text-align:left;font-size:8px" data-a="pickday" data-i="${d}">${DAYS[d].slice(0,3)}: ${planName(d)}</button>`).join("")}<p class="m">Tap a day to change it. START runs the routine planned for today.</p></div>`}
+let AC;function beep(fs){if(!S.snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();fs.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type="square";o.frequency.value=f;g.gain.value=.04;o.connect(g);g.connect(AC.destination);const t=AC.currentTime+i*.09;o.start(t);o.stop(t+.08)})}catch(e){}}
+function toast(t){const e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",1800);beep(/LEVEL|DONE|ALL/i.test(t)?[660,880,1100]:[520])}
+function confetti(){const c=S.theme.c.slice(3);for(let i=0;i<40;i++){const d=document.createElement("i");d.className="cf";d.style.cssText=`left:${Math.random()*100}vw;background:${c[i%2]};animation-delay:${Math.random()*.4}s`;document.body.appendChild(d);setTimeout(()=>d.remove(),2400)}}
+function hud(){const L=lvl();return `<div class="r m"><span>LV ${L.l}</span><span>${S.coins}c</span><span>STREAK ${S.streak}</span></div><div class="bar"><i style="width:${L.x/L.n*100}%"></i></div>`}
+function petTap(){const e=document.querySelector(".scene .pet");if(!e)return;e.classList.remove("hop");void e.offsetWidth;e.classList.add("hop");const m=S.hunger>50?["Happy!","Ready to train?"]:S.hunger>20?["Hungry...","Feed me!"]:["So weak...","Food please"];toast(pet(S.pet)[1]+": "+m[Math.floor(Math.random()*2)])}
+function settings(){return `<div class="scrim" data-a="close"></div><div class="c modal"><h2>SETTINGS</h2><button class="g" style="width:100%;margin-bottom:8px" data-a="crt">CRT LINES: ${S.crt?"ON":"OFF"}</button><button class="g" style="width:100%;margin-bottom:8px" data-a="snd">SOUND: ${S.snd?"ON":"OFF"}</button><p class="m">Notifications coming soon.</p><button class="g" data-a="logout">LOG OUT</button> <button data-a="close">CLOSE</button></div>`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||!P)return;const a=b.dataset.a;
+ if(a=="crt"){S.crt=!S.crt;save();render()}
+ else if(a=="snd"){S.snd=!S.snd;beep([520,780]);save();render()}
+ else if(a=="pet2")petTap()});
+const pp=()=>S.pp||(S.pp={xp:0,joy:60,born:dk()});
+const THR=[0,200,600,1500];
+const formPct=()=>{const s=stage(),x=pp().xp;return s>=4?100:Math.round((x-THR[s-1])/(THR[s]-THR[s-1])*100)};
+const SHOP=[["snack","Snack","Food +15",10],["meal","Meal","Food +40",25],["feast","Feast","Food +100",60],["toy","Toy","Joy +30",15],["xp2","XP Potion","2x XP on your next workout",80],["shield","Streak Shield","Saves a missed day (max 3)",120]];
+const SKIN=["#f9d7b5","#f1c9a0","#d9a066","#b87a4b","#8d5524","#5c3317"],COL=["#e53935","#fb8c00","#fdd835","#43a047","#1e88e5","#8e24aa","#eceff1","#212121"];
+const CAM=["...aa.....","aaaaaaaaaa","abbbbbbbba","abbllllbba","abbllllbba","abbbbbbbba","aaaaaaaaaa"];
+function cam(){const c=document.createElement("canvas");c.width=10;c.height=7;const x=c.getContext("2d");CAM.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==".")return;x.fillStyle=ch=="a"?S.theme.c[3]:ch=="b"?"#222":"#fff";x.fillRect(i,j,1,1)}));return c.toDataURL()}
+function figure(){const c=document.createElement("canvas");c.width=10;c.height=13;const x=c.getContext("2d"),t=S.theme.c,a=S.av||{};FIG.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==".")return;x.fillStyle={h:a.skin||"#f1c9a0",e:"#111",t:a.shirt||t[3],p:a.pants||t[4],s:"#111"}[ch];x.fillRect(i,j,1,1)}));return c.toDataURL()}
+const pbar=(l,v)=>`<div class="m">${l}</div><div class="bar h"><i style="width:${Math.max(0,Math.min(100,v))}%"></i></div>`;
+function rollover(){const t=dk();if(S.lastDay&&S.streak){const g=gap(t,S.lastDay);if(g==2&&S.shields>0){S.shields--;S.lastDay=dk(new Date(Date.now()-864e5));toast("Streak shield used")}else if(g>1)S.streak=0}
+ const n=Date.now(),h=(n-S.t)/36e5;S.hunger=Math.max(0,S.hunger-h*4);pp().joy=Math.max(0,pp().joy-h*2);S.t=n}
+async function begin(){const id=plan()[dow()];if(!id){ui.pk=dow();render();return}
+ if(id=="rest"){if(day().rest){toast("Already checked in");return}day().rest=1;credit();(S.hist=S.hist||{})[dk()]="r";S.xp+=10;pp().xp+=10;toast("Rest day logged +10 XP");save();render();return}
+ const w=WO.find(x=>x.id==id);S.wo={id,done:w.ex.map(()=>false),dur:30};S.wk=Date.now();try{WL=await navigator.wakeLock.request("screen")}catch(e){}save();render()}
+function finish(){const w=WO.find(x=>x.id==S.wo.id),n=w.ex.length,c=S.wo.done.filter(Boolean).length,lv=lvl().l,sb=stage();let xp=c*12+(c==n?30:0);if(S.boost&&xp){xp*=2;S.boost=0}
+ S.xp+=xp;S.coins+=Math.round(xp/2);pp().xp+=xp;pp().joy=Math.min(100,pp().joy+(c?25:0));
+ if(c){S.wc=(S.wc||0)+1;S.mv=(S.mv||0)+c;if(c==n)S.fc=(S.fc||0)+1}
+ if(c>=Math.ceil(n/2)){credit();(S.hist=S.hist||{})[dk()]="w";toast("Workout done +"+xp+" XP")}else toast("+"+xp+" XP. Do half next time to keep your streak");
+ endWk();if(c==n||lvl().l>lv)confetti();if(lvl().l>lv)setTimeout(()=>toast("LEVEL "+lvl().l+"!"),1900);if(stage()>sb)setTimeout(()=>{toast(pet(S.pet)[1]+" evolved!");confetti()},2600)}
+function buy(id){const it=SHOP.find(x=>x[0]==id);if(!it||S.coins<it[3])return;
+ if(id=="shield"&&S.shields>=3){toast("Max shields");return}
+ if(id=="xp2"&&S.boost){toast("Potion already active");return}
+ S.coins-=it[3];
+ if(id=="snack")S.hunger=Math.min(100,S.hunger+15);else if(id=="meal")S.hunger=Math.min(100,S.hunger+40);else if(id=="feast")S.hunger=Math.min(100,S.hunger+100);
+ else if(id=="toy")pp().joy=Math.min(100,pp().joy+30);else if(id=="xp2")S.boost=1;else if(id=="shield")S.shields++;
+ if(id=="snack"||id=="meal"||id=="feast")pp().xp+=({snack:2,meal:6,feast:15})[id];
+ toast(it[1]+" bought")}
+function adopt(id){S.pet=id;S.pp={xp:0,joy:60,born:dk()};S.hunger=70;S.rel=(S.rel||0)+1;ui.p=null;toast("Welcome, "+pet(id)[1])}
+function petTap(){const e=document.querySelector(".pbox .pet");if(!e)return;e.classList.remove("hop");void e.offsetWidth;e.classList.add("hop");pp().joy=Math.min(100,pp().joy+3);const m=S.hunger>50?["Happy!","Ready to train?"]:S.hunger>20?["Hungry...","Feed me!"]:["So weak...","Food please"];toast(pet(S.pet)[1]+": "+m[Math.floor(Math.random()*2)]);save()}
+function homeV2(){const p=pet(S.pet),L=lvl(),m=S.hunger>50?"happy":S.hunger>20?"hungry":"critical",x=pp(),hp=PFP&&(S.av||{}).head!="face";
+ return `<div class="hint">CLICK TO EDIT AVATAR</div><div class="sc"><button class="desk" data-a="panel" data-i="pic"><img src="${cam()}" style="width:60px;image-rendering:pixelated"><br>PICTURES</button><div class="fig" data-a="av"><img src="${figure()}">${hp?`<img class="pfp" src="${PFP}">`:""}</div><button class="sign" data-a="begin"><div class="bd">${plan()[dow()]=="rest"?"CHECK IN":"START"}</div><div class="po"></div><div class="pl" data-a="pickday" data-i="${dow()}">${planName(dow())}</div></button></div><div class="plat ${S.plat||""}"></div>
+<div class="hud2"><div class="bar"><i style="width:${L.x/L.n*100}%"></i></div><div class="r m"><span>XP ${L.x}/${L.n} LV${L.l}</span><span>${S.coins}c</span><span>STREAK ${S.streak}</span></div></div>
+${deloadHTML()}${bossHTML()}<div class="pc"><div><h2>${esc(p[1]).toUpperCase()}</h2><div class="pbox"><img class="pet ${m}" src="${sprite(p,stage(),S.theme.c[4],S.hat)}" data-a="pet2"></div>${pbar("FOOD",S.hunger)}${pbar("JOY",x.joy)}${pbar("FORM "+stage()+"/4",formPct())}</div>
+<div class="shop"><h2 style="padding:8px 8px 0">SHOP UPGRADES</h2><div class="li">${shopRows()}</div><div class="r" style="padding:6px"><button class="g" style="font-size:8px;padding:6px" data-a="panel" data-i="pets">PETS</button><span class="m">${S.coins}c</span></div></div></div>`}
+function rosterHTML(){const p=pet(S.pet),x=pp();return `<div class="c"><h2>YOUR PET: ${esc(p[1]).toUpperCase()}</h2><p class="m">FORM ${stage()}/4 | ${x.xp} PET XP | ${gap(dk(),x.born)} DAYS OLD<br><br>You can only have one pet. Adopting another releases this one forever and its progress is lost.</p></div><div class="pgrid">${PETS.map(q=>{const u=unlocked(q),cur=S.pet==q[0];return `<button class="pk ${cur?"sel":""} ${u?"":"lk"}" ${u&&!cur?`data-a="rel" data-i="${q[0]}"`:"disabled"}><img src="${sprite(q,1,"#fff")}"><br>${cur?"YOURS":u?q[1]:req(q)}</button>`}).join("")}</div>`}
+function statsHTML(){const L=lvl(),x=pp();return `<div class="c"><h2>STATS</h2><p class="m">LEVEL ${L.l} | TOTAL XP ${S.xp}<br><br>WORKOUTS ${S.wc||0} | MOVES ${S.mv||0}<br><br>FULL ROUTINES ${S.fc||0}<br><br>STREAK ${S.streak} | BEST ${S.best}<br><br>SHIELDS ${S.shields}/3<br><br>PET AGE ${gap(dk(),x.born)} DAYS | PET XP ${x.xp}</p></div>`}
+const BADGES=[["First Rep","Finish 1 workout",()=>(S.wc||0)>=1],["Warm Streak","3-day streak",()=>S.best>=3],["Week Warrior","7-day streak",()=>S.best>=7],["Iron Month","30-day streak",()=>S.best>=30],["Regular","10 workouts",()=>(S.wc||0)>=10],["Veteran","50 workouts",()=>(S.wc||0)>=50],["Perfectionist","Finish every move in a routine",()=>(S.fc||0)>=1],["Level 5","Reach level 5",()=>lvl().l>=5],["Level 10","Reach level 10",()=>lvl().l>=10],["Pet Parent","Keep one pet for 7 days",()=>gap(dk(),pp().born)>=7]];
+function badgesHTML(){return `<div class="c"><h2>BADGES ${BADGES.filter(b=>b[2]()).length}/${BADGES.length}</h2>${BADGES.map(b=>`<div class="m" style="margin:8px 0;${b[2]()?"color:var(--a2)":""}">[${b[2]()?"X":" "}] ${b[0]} - ${b[1]}</div>`).join("")}</div>`}
+function logHTML(){const c=[];for(let i=20;i>=0;i--){const d=dk(new Date(Date.now()-i*864e5));c.push(`<div class="lc ${(S.hist||{})[d]||""}"></div>`)}return `<div class="c"><h2>LAST 21 DAYS</h2><div class="lg">${c.join("")}</div><p class="m">Bright = workout. Accent = rest day check-in. Dark = nothing logged.</p></div>`}
+function sheet(){return ui.p=="pets"?rosterHTML():ui.p=="stats"?statsHTML():ui.p=="badges"?badgesHTML():ui.p=="log"?logHTML():picHTML()}
+function tabs2(){return `<div class="tabs2">${[["pets","PETS"],["stats","STATS"],["badges","BADGES"],["log","LOG"]].map(t=>`<button class="${ui.p==t[0]?"":"g"}" data-a="panel" data-i="${t[0]}">${t[1]}</button>`).join("")}</div>`}
+function avModal(){const a=S.av||{},sw=(k,L)=>L.map(c=>`<button class="sw1" style="background:${c}" data-a="avs" data-k="${k}" data-i="${c}"></button>`).join("");
+ return `<div class="scrim" data-a="closeav"></div><div class="c modal" style="top:6%;max-height:88vh;overflow:auto"><h2>EDIT AVATAR</h2><label>SKIN</label><div class="sw">${sw("skin",SKIN)}</div><br><label>SHIRT</label><div class="sw">${sw("shirt",COL)}</div><br><label>PANTS</label><div class="sw">${sw("pants",COL)}</div><br><label>HEAD</label><button class="g" style="width:100%;margin:6px 0;font-size:8px" data-a="avh">${a.head=="face"?"PIXEL FACE":"PROFILE PIC"} (TAP TO SWITCH)</button><label class="fb">CHOOSE HEAD PIC<input type="file" accept="image/*" data-f="pfp" hidden></label>${PFP?`<button class="g" data-a="rmpfp">REMOVE PIC</button> `:""}<button data-a="closeav">DONE</button></div>`}
+function relModal(){const n=pet(ui.rel),p=pet(S.pet);return `<div class="scrim" data-a="norel"></div><div class="c modal" style="top:16%"><h2>RELEASE ${esc(p[1]).toUpperCase()}?</h2><p class="m">${esc(p[1])} will be gone forever. Its FORM ${stage()} and ${pp().xp} pet XP cannot be recovered. ${esc(n[1])} starts fresh at FORM 1.</p><button class="g" style="width:100%;margin-bottom:10px" data-a="norel">KEEP ${esc(p[1]).toUpperCase()}</button><button style="width:100%" data-a="adopt">RELEASE + ADOPT</button></div>`}
+function settings(){return `<div class="page"><div class="r" style="margin-bottom:12px"><button class="g" data-a="close">&lt;</button><h2 style="margin:0">SETTINGS</h2><span></span></div>${themeHTML()}<div class="c"><h2>EFFECTS</h2><button class="g" style="width:100%;margin-bottom:8px" data-a="crt">CRT LINES: ${S.crt?"ON":"OFF"}</button><button class="g" style="width:100%" data-a="snd">SOUND: ${S.snd?"ON":"OFF"}</button></div><div class="c"><h2>PROFILE</h2><p class="m">${esc(P.first)} ${esc(P.last)} | @${esc(P.user)} | ${P.tier=="adult"?"18+":"14-17"}<br><br>Notifications coming soon.</p><button class="g" data-a="logout">LOG OUT</button></div></div>`}
+function render(){document.body.classList.toggle("crt",!!S.crt);const a=$("#app");if(!P){ui={p:null,m:0,s:0,b:1};a.innerHTML=authHTML();return}
+ if(S.wk&&S.wo){a.innerHTML=workoutHTML();return}
+ a.innerHTML=`<div class="pg"><div class="top"><button class="g" data-a="menu">\u2261</button><b>@${esc(P.user)}</b><button class="g" data-a="gear">\u2699</button></div>${homeV2()}</div>${ui.m?drawer():""}${ui.p?`<div class="sheet2"><button class="g x" data-a="panel" data-i="">X</button>${sheet()}</div>`:""}${tabs2()}${ui.pk!=null?pickModal():""}${ui.av?avModal():""}${ui.rel?relModal():""}${ui.rb?rbPage():""}${ui.s?settings():""}`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||!P)return;const a=b.dataset.a,i=b.dataset.i;let ch=1;
+ if(a=="buy")buy(i);
+ else if(a=="rel")ui.rel=i;
+ else if(a=="norel")ui.rel=null;
+ else if(a=="adopt"){adopt(ui.rel);ui.rel=null}
+ else if(a=="av")ui.av=1;
+ else if(a=="closeav")ui.av=0;
+ else if(a=="avs"){S.av=S.av||{};S.av[b.dataset.k]=i}
+ else if(a=="avh"){S.av=S.av||{};S.av.head=S.av.head=="face"?"pfp":"face"}
+ else ch=0;
+ if(ch){save();render()}});
+SHOP.push(["hat_crown","Crown","Pet hat",150,"hat"],["hat_cap","Cap","Pet hat",80,"hat"],["hat_shades","Shades","Pet shades",100,"hat"],["bg_grass","Grass Platform","Look",60,"bg"],["bg_space","Space Platform","Look",90,"bg"],["bg_lava","Lava Platform","Look",90,"bg"],["fit_hero","Hero Outfit","Avatar colors",120,"fit"],["fit_ninja","Ninja Outfit","Avatar colors",120,"fit"]);
+BADGES.push(["Boss Slayer","Defeat a weekly boss",()=>(S.bk||0)>=1],["Fashionista","Own 3 cosmetics",()=>Object.keys(S.own||{}).length>=3]);
+const MOVES=["Push-ups","Diamond push-ups","Pike push-ups","Dips","Pull-ups","Chin-ups","Inverted rows","Squats","Lunges","Jump squats","Glute bridges","Calf raises","Plank","Side plank","Leg raises","Hollow hold","Burpees","Mountain climbers","Jumping jacks","High knees","Handstand hold","L-sit","Superman","Stretch"];
+const BOSSES=[["Iron Golem","blob","#616161","#ffb300"],["Night Drake","snake","#311b92","#ff5252"],["Frost Giant","quad","#b3e5fc","#0288d1"],["Storm Roc","bird","#455a64","#ffee58"],["Sea Beast","fish","#004d40","#80cbc4"],["Hive Queen","bug","#f9a825","#212121"]],BHP=40;
+const wkKey=()=>{const d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7);return dk(d)};
+const bw=()=>S.bw&&S.bw.k==wkKey()?S.bw:(S.bw={k:wkKey(),dmg:0,won:0});
+let RB={name:"",ex:[]};
+function syncCW(){const cw=S.cw||[];for(let i=WO.length-1;i>=0;i--)if(WO[i].id.startsWith("c_")&&!cw.find(w=>w.id==WO[i].id))WO.splice(i,1);cw.forEach(w=>{if(!WO.find(x=>x.id==w.id))WO.push(w)})}
+function sprite(p,st,a1,hat){const g=BASE[p[2]],c=document.createElement("canvas");c.width=14;c.height=12;const x=c.getContext("2d");
+const f=(i,j)=>g[j]&&g[j][i]&&g[j][i]!==".";
+if(st>=3){x.fillStyle=a1;for(let j=-1;j<=10;j++)for(let i=-1;i<=12;i++)if(!f(i,j)&&(f(i+1,j)||f(i-1,j)||f(i,j+1)||f(i,j-1)))x.fillRect(i+1,j+1,1,1)}
+g.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==".")return;x.fillStyle=ch=="a"?p[3]:ch=="b"?p[4]:"#111";x.fillRect(i+1,j+1,1,1)}));
+if(st>=2){x.fillStyle="#ffd54f";x.fillRect(6,0,2,1)}
+if(st>=4){x.fillStyle="#fff";[[0,2],[13,1],[1,10],[12,9]].forEach(([i,j])=>x.fillRect(i,j,1,1))}
+if(hat){const j1=g.findIndex(r=>r.replace(/\./g,"").length>=4),cs=[...g[j1]].map((ch,i)=>ch!="."?i:-1).filter(i=>i>=0),mid=Math.round((cs[0]+cs[cs.length-1])/2)+1;
+ if(hat=="hat_crown"){x.fillStyle="#ffd54f";x.fillRect(mid-1,j1,3,1);if(j1>0){x.fillRect(mid-1,j1-1,1,1);x.fillRect(mid+1,j1-1,1,1)}}
+ else if(hat=="hat_cap"){x.fillStyle="#e53935";x.fillRect(mid-2,j1,4,1);x.fillRect(mid-3,j1+1,2,1)}
+ else if(hat=="hat_halo"){x.fillStyle="#fff";x.fillRect(mid-1,j1,3,1)}else if(hat=="hat_horns"){x.fillStyle="#e53935";x.fillRect(mid-2,j1,1,1);x.fillRect(mid+1,j1,1,1);if(j1>0){x.fillRect(mid-2,j1-1,1,1);x.fillRect(mid+1,j1-1,1,1)}}else if(hat=="hat_shades"){const er=g.findIndex(r=>r.includes("e")),r=g[er];x.fillStyle="#000";x.fillRect(r.indexOf("e")+1,er+1,r.lastIndexOf("e")-r.indexOf("e")+1,1)}}
+return c.toDataURL()}
+function shopRows(){return SHOP.filter(s=>s[5]!="season"||(S.own||{})[s[0]]).map(s=>{const cos=s[4],own=cos&&(S.own||{})[s[0]],on=cos=="hat"?S.hat==s[0]:cos=="bg"?S.plat==s[0].slice(3):false,lab=own?(on?"ON":"WEAR"):s[3]+"c";
+ return `<div class="sr"><div><b style="font-size:8px">${s[1]}</b><div class="m" style="font-size:7px">${s[2]}</div></div><button style="font-size:8px;padding:6px" data-a="buy" data-i="${s[0]}" ${!own&&S.coins<s[3]?"disabled":""}>${lab}</button></div>`}).join("")}
+function buy(id){const it=SHOP.find(x=>x[0]==id);if(!it)return;const cos=it[4];
+ if(cos){S.own=S.own||{};if(!S.own[id]){if(S.coins<it[3])return;S.coins-=it[3];S.own[id]=1;toast(it[1]+" unlocked")}
+  if(cos=="hat")S.hat=S.hat==id?"":id;else if(cos=="bg")S.plat=S.plat==id.slice(3)?"":id.slice(3);else{S.av=S.av||{};if(id=="fit_hero"){S.av.shirt="#e53935";S.av.pants="#1e88e5"}else{S.av.shirt="#212121";S.av.pants="#212121"}}
+  return}
+ if(S.coins<it[3])return;
+ if(id=="shield"&&S.shields>=3){toast("Max shields");return}
+ if(id=="xp2"&&S.boost){toast("Potion already active");return}
+ S.coins-=it[3];
+ if(id=="snack")S.hunger=Math.min(100,S.hunger+15);else if(id=="meal")S.hunger=Math.min(100,S.hunger+40);else if(id=="feast")S.hunger=Math.min(100,S.hunger+100);
+ else if(id=="toy")pp().joy=Math.min(100,pp().joy+30);else if(id=="xp2")S.boost=1;else if(id=="shield")S.shields++;
+ if(id=="snack"||id=="meal"||id=="feast")pp().xp+=({snack:2,meal:6,feast:15})[id];
+ toast(it[1]+" bought")}
+function bossHTML(){const w=bw(),b=BOSSES[Math.floor(new Date(wkKey()).getTime()/6048e5)%BOSSES.length],left=7-((new Date().getDay()+6)%7);
+ return `<div class="bossc"><img src="${sprite(["b",b[0],b[1],b[2],b[3]],3,S.theme.c[4])}"><div><b style="font-size:9px">WEEKLY BOSS: ${b[0].toUpperCase()}</b><div class="bar"><i style="width:${Math.min(100,w.dmg/BHP*100)}%"></i></div><div class="m">${Math.min(w.dmg,BHP)}/${BHP} DMG | ${w.won?"DEFEATED":left+" DAYS LEFT"}<br>Every move you check off = 1 damage</div></div></div>`}
+function chart(h){const a=h.slice(-12),mx=Math.max(...a.map(z=>z.v)),mn=Math.min(...a.map(z=>z.v)),W=300,H=110,px=i=>a.length>1?10+i*(W-20)/(a.length-1):W/2,py=v=>mx==mn?H/2:H-12-(v-mn)/(mx-mn)*(H-24);
+ return `<svg class="chart" viewBox="0 0 ${W} ${H}"><polyline points="${a.map((z,i)=>px(i)+","+py(z.v)).join(" ")}"/>${a.map((z,i)=>`<circle cx="${px(i)}" cy="${py(z.v)}" r="3"/>`).join("")}</svg><p class="m">${a.length} SESSIONS | BEST ${mx} | LATEST ${a[a.length-1].v}</p>`}
+function statsHTML(){const L=lvl(),x=pp(),ks=Object.keys(S.pr||{}),k=ui.prv&&S.pr&&S.pr[ui.prv]?ui.prv:null;
+ return `<div class="c"><h2>STATS</h2><p class="m">LEVEL ${L.l} | TOTAL XP ${S.xp}<br><br>WORKOUTS ${S.wc||0} | MOVES ${S.mv||0}<br><br>FULL ROUTINES ${S.fc||0} | BOSSES ${S.bk||0}<br><br>STREAK ${S.streak} | BEST ${S.best}<br><br>SHIELDS ${S.shields}/3<br><br>PET AGE ${gap(dk(),x.born)} DAYS | PET XP ${x.xp}</p></div><div class="c"><h2>RECORDS</h2>${ks.length?ks.map(n=>`<button class="${k==n?"":"g"}" style="font-size:8px;margin:0 6px 6px 0" data-a="prv" data-i="${esc(n)}">${esc(n)} ${Math.max(...S.pr[n].map(z=>z.v))}</button>`).join(""):`<p class="m">Type your best set in the box next to a move during a workout and it shows up here.</p>`}${k?chart(S.pr[k]):""}</div>`}
+function workoutHTML(){syncCW();const w=WO.find(x=>x.id==S.wo.id),dn=S.wo.done,pr=S.wo.pr||(S.wo.pr=[]),c=dn.filter(Boolean).length,r=Math.max(0,S.wo.dur*60-(Date.now()-S.wk)/1e3);
+ return `<main><div class="r"><button class="g" data-a="bail2">&lt;</button><span class="m">${w.name.toUpperCase()} | ${c}/${w.ex.length}</span></div><h2 style="text-align:center;margin-top:12px">TIMER</h2><div id="wt" class="big">${fmt(r)}</div><p class="m" style="text-align:center">30 MINS DEFAULT</p><div class="r">${[15,30,45,60].map(m=>`<button class="${S.wo.dur==m?"":"g"}" data-a="dur" data-i="${m}">${m}m</button>`).join("")}</div><div style="text-align:center;margin:12px"><button class="g" data-a="bail2">BAIL</button></div><div class="list">${w.ex.map((e,i)=>`<div class="ex ${dn[i]?"done":""}"><div style="flex:1"><b>${esc(e[0])}</b><div class="m">${progTxt(e)}</div><div class="m">${esc(e[2])}</div></div><input class="rep" type="number" inputmode="numeric" placeholder="best" data-pr="${i}" value="${pr[i]||""}"><button class="ck" data-a="chk" data-i="${i}">${dn[i]?"\u2713":""}</button></div>`).join("")}</div><p class="m">Type your best set (reps or seconds) in the box to track records. Rest 60-90s between sets. Everything else is locked until you finish.</p><button style="width:100%" data-a="finish">FINISH WORKOUT</button></main>`}
+function finish(){const w=WO.find(x=>x.id==S.wo.id),n=w.ex.length,c=S.wo.done.filter(Boolean).length,lv=lvl().l,sb=stage();let xp=c*12+(c==n?30:0),prs=0;if(S.boost&&xp){xp*=2;S.boost=0}
+ S.pr=S.pr||{};(S.wo.pr||[]).forEach((v,i)=>{v=+v;if(v>0&&w.ex[i]){const k=w.ex[i][0],h=S.pr[k]=S.pr[k]||[],best=Math.max(0,...h.map(z=>z.v)),t=h.find(z=>z.d==dk());if(t)t.v=Math.max(t.v,v);else h.push({d:dk(),v});if(h.length>1&&v>best)prs++}});
+ S.xp+=xp;S.coins+=Math.round(xp/2);pp().xp+=xp;pp().joy=Math.min(100,pp().joy+(c?25:0));
+ if(c){S.wc=(S.wc||0)+1;S.mv=(S.mv||0)+c;if(c==n)S.fc=(S.fc||0)+1}
+ const bo=bw();bo.dmg+=c;if(!bo.won&&bo.dmg>=BHP){bo.won=1;S.coins+=150;S.xp+=100;S.bk=(S.bk||0)+1;setTimeout(()=>{toast("BOSS DEFEATED! +150c +100 XP");confetti()},3400)}
+ if(c>=Math.ceil(n/2)){credit();(S.hist=S.hist||{})[dk()]="w";toast("Workout done +"+xp+" XP")}else toast("+"+xp+" XP. Do half next time to keep your streak");
+ endWk();if(c==n||lvl().l>lv)confetti();if(lvl().l>lv)setTimeout(()=>toast("LEVEL "+lvl().l+"!"),1900);if(stage()>sb)setTimeout(()=>{toast(pet(S.pet)[1]+" evolved!");confetti()},2600);if(prs)setTimeout(()=>{toast("NEW PERSONAL RECORD!");confetti()},3000)}
+function drawer(){const L=lvl(),td=dow();return `<div class="scrim" data-a="menu"></div><div class="drawer"><h2>WEEK PLAN</h2><p class="m">LV ${L.l} | STREAK ${S.streak} | SHIELDS ${S.shields}</p>${[1,2,3,4,5,6,0].map(d=>`<button class="${d==td?"":"g"}" style="width:100%;margin-bottom:6px;text-align:left;font-size:8px" data-a="pickday" data-i="${d}">${DAYS[d].slice(0,3)}: ${planName(d)}</button>`).join("")}<button class="g" style="width:100%;margin:8px 0;font-size:8px" data-a="rbopen">MY ROUTINES (BUILD YOUR OWN)</button><p class="m">Tap a day to change it. START runs the routine planned for today.</p></div>`}
+function rbPage(){return `<div class="page"><div class="r" style="margin-bottom:12px"><button class="g" data-a="rbclose">&lt;</button><h2 style="margin:0">MY ROUTINES</h2><span></span></div><div class="c"><h2>NEW ROUTINE</h2><label>NAME</label><input data-rb="name" value="${esc(RB.name)}" maxlength="24">${RB.ex.map((e,i)=>`<div class="ex"><div style="flex:1"><b>${esc(e[0])}</b><input data-rbi="${i}" value="${esc(e[1])}" placeholder="3 x 10"></div><button class="g" data-a="rbdel" data-i="${i}">X</button></div>`).join("")}<label>ADD A MOVE</label><select id="rbsel">${MOVES.map(m=>`<option>${m}</option>`).join("")}</select><button class="g" style="width:100%;margin-bottom:8px" data-a="rbadd">+ ADD MOVE</button><button style="width:100%" data-a="rbsave">SAVE ROUTINE</button></div><div class="c"><h2>SAVED</h2>${(S.cw||[]).length?S.cw.map(w=>`<div class="r" style="margin-bottom:8px"><span class="m">${esc(w.name)} (${w.ex.length})</span><button class="g" data-a="rbrm" data-i="${w.id}">DEL</button></div>`).join(""):`<p class="m">Nothing yet. Saved routines show up when you pick a day.</p>`}</div></div>`}
+function settings(){const r=S.rem||{};return `<div class="page"><div class="r" style="margin-bottom:12px"><button class="g" data-a="close">&lt;</button><h2 style="margin:0">SETTINGS</h2><span></span></div>${themeHTML()}<div class="c"><h2>REMINDERS</h2><button class="g" style="width:100%;margin-bottom:8px" data-a="rem">DAILY REMINDER: ${r.on?"ON":"OFF"}</button><label>TIME</label><input type="time" data-r="t" value="${r.t||"18:00"}"><p class="m">Works while the app is open. Background push comes with the deployed version.</p></div><div class="c"><h2>EFFECTS</h2><button class="g" style="width:100%;margin-bottom:8px" data-a="crt">CRT LINES: ${S.crt?"ON":"OFF"}</button><button class="g" style="width:100%" data-a="snd">SOUND: ${S.snd?"ON":"OFF"}</button><button class="g" style="width:100%;margin-top:8px" data-a="vc">VOICE CUES: ${S.vc===0?"OFF":"ON"}</button></div><div class="c"><h2>PROFILE</h2><p class="m">${esc(P.first)} ${esc(P.last)} | @${esc(P.user)} | ${P.tier=="adult"?"18+":"14-17"}</p><button class="g" data-a="logout">LOG OUT</button></div></div>`}
+setInterval(()=>{const r=S.rem;if(!P||!r||!r.on)return;const n=new Date(),hm=String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");if(hm==r.t&&r.last!=dk()){r.last=dk();save();toast("Time to train. Your pet is waiting.");try{if(Notification.permission=="granted")new Notification("Forge",{body:"Time to train. Your pet is waiting."})}catch(e){}}},20000);
+document.addEventListener("input",e=>{const d=e.target.dataset;if(d.pr!==undefined&&S.wo){(S.wo.pr=S.wo.pr||[])[+d.pr]=e.target.value;save()}else if(d.rb=="name")RB.name=e.target.value;else if(d.rbi!==undefined&&RB.ex[+d.rbi])RB.ex[+d.rbi][1]=e.target.value;else if(d.r=="t"){S.rem=S.rem||{on:0,t:"18:00"};S.rem.t=e.target.value;save()}});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||!P)return;const a=b.dataset.a,i=b.dataset.i;let ch=1;
+ if(a=="prv")ui.prv=i;
+ else if(a=="rbopen"){ui.rb=1;ui.m=0}
+ else if(a=="rbclose")ui.rb=0;
+ else if(a=="rbadd"){if(RB.ex.length>=12){toast("Max 12 moves");ch=0}else RB.ex.push([$("#rbsel").value,"3 x 10",""])}
+ else if(a=="rbdel")RB.ex.splice(+i,1);
+ else if(a=="rbsave"){if(!RB.name.trim()||!RB.ex.length){toast("Name it and add a move");ch=0}else{(S.cw=S.cw||[]).push({id:"c_"+Date.now(),name:RB.name.trim(),focus:"CUSTOM",ex:RB.ex.map(m=>[m[0],m[1]||"3 x 10","Your routine."])});RB={name:"",ex:[]};toast("Saved. Pick it from any day.")}}
+ else if(a=="rbrm"){S.cw=(S.cw||[]).filter(w=>w.id!=i);Object.keys(plan()).forEach(d=>{if(plan()[d]==i)plan()[d]=""});syncCW()}
+ else if(a=="rem"){S.rem=S.rem||{on:0,t:"18:00"};S.rem.on=S.rem.on?0:1;if(S.rem.on){try{Notification.requestPermission()}catch(x){}}}
+ else ch=0;
+ if(ch){save();render()}});
+SHOP.push(["hat_halo","Halo","Season reward",0,"hat","season"],["hat_horns","Horns","Season reward",0,"hat","season"],["bg_gold","Gold Platform","Season reward",0,"bg","season"]);
+const SEASONS=["Iron Dawn","Frostbound","Spring Surge","Summer Forge","Harvest Grind","Ember Night"],SEASONR=[[60,"hat_halo","Halo hat"],[150,"hat_horns","Horns hat"],[250,"bg_gold","Gold platform"]];
+const sk=()=>Math.floor((new Date(wkKey())-new Date("2026-01-05"))/6048e5/8),sp=()=>S.sp&&S.sp.k==sk()?S.sp:(S.sp={k:sk(),pts:0});
+const mon=()=>{const[y,m,d]=wkKey().split("-").map(Number);return new Date(y,m-1,d)};
+const parseD=d=>{const m=String(d).match(/^(\d+) x (\d+)( ?s| min)?( each)?$/);return m?{s:m[1],n:+m[2],u:m[3]||"",e:m[4]||""}:null};
+function tgt(name,d){const q=parseD(d);if(!q)return{t:null,txt:d};const t=(S.tg||{})[name]||q.n;return{t,q,txt:q.s+" x "+t+q.u+q.e}}
+function progTxt(e){const T=tgt(e[0],e[1]),h=(S.hit||{})[e[0]];return esc(T.txt)+(T.t&&h?" | "+h+"/3 TO LEVEL UP":"")}
+function say(t){if(S.vc===0)return;try{speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(t))}catch(e){}}
+function tickUI(){const a=$("#wt");if(a&&S.wk&&S.wo){const r=Math.max(0,S.wo.dur*60-(Date.now()-S.wk)/1e3);a.textContent=fmt(r);const cu=S.wo.cu=S.wo.cu||{};[[60,"One minute left"],[30,"30 seconds left"],[10,"10 seconds"]].forEach(([t,m])=>{if(r<=t&&r>t-5&&!cu[t]){cu[t]=1;say(m)}});if(r<=0&&!S.wo.alarm){S.wo.alarm=1;toast("TIME UP");say("Time is up");try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}}}
+function prog(){const w=WO.find(x=>x.id==S.wo.id),c=S.wo.done.filter(Boolean).length;
+ (S.wo.pr||[]).forEach((v,i)=>{v=+v;const e=w.ex[i];if(!e||!(v>0))return;const T=tgt(e[0],e[1]);if(!T.t)return;S.hit=S.hit||{};S.hit[e[0]]=v>=T.t?(S.hit[e[0]]||0)+1:0;if(S.hit[e[0]]>=3){const u=T.q.u.trim(),inc=u=="s"?5:u?1:2;(S.tg=S.tg||{})[e[0]]=T.t+inc;S.hit[e[0]]=0;setTimeout(()=>toast("TARGET UP: "+e[0]+" "+T.t+" > "+(T.t+inc)),3600)}});
+ const s=sp();s.pts+=c;SEASONR.forEach(r=>{if(s.pts>=r[0]&&!(S.own||{})[r[1]]){(S.own=S.own||{})[r[1]]=1;setTimeout(()=>toast("SEASON REWARD: "+r[2]),4300)}})}
+const finish0=finish;finish=function(){try{prog()}catch(e){}finish0()};
+function seasonHTML(){const s=sp(),k=sk(),wk=Math.floor((new Date(wkKey())-new Date("2026-01-05"))/6048e5)%8+1;return `<div class="c"><h2>SEASON ${k+1}: ${SEASONS[k%6].toUpperCase()}</h2><p class="m">WEEK ${wk}/8 | ${s.pts} POINTS (1 per move)<br><br>${SEASONR.map(r=>(s.pts>=r[0]?"[X] ":"[ ] ")+r[0]+" pts: "+r[2]).join("<br>")}<br><br>Leaderboards need the online version.</p></div>`}
+function badgesHTML(){return seasonHTML()+`<div class="c"><h2>BADGES ${BADGES.filter(b=>b[2]()).length}/${BADGES.length}</h2>${BADGES.map(b=>`<div class="m" style="margin:8px 0;${b[2]()?"color:var(--a2)":""}">[${b[2]()?"X":" "}] ${b[0]} - ${b[1]}</div>`).join("")}</div>`}
+function deloadHTML(){if(S.dl==wkKey())return"";let ok=true;for(let w=1;w<=6&&ok;w++){const st=mon();st.setDate(st.getDate()-7*w);let n=0;for(let d=0;d<7;d++){const x=new Date(st);x.setDate(x.getDate()+d);if((S.hist||{})[dk(x)]=="w")n++}if(n<4)ok=false}
+ return ok?`<div class="bossc"><div><b style="font-size:9px">DELOAD WEEK SUGGESTED</b><div class="m">6 hard weeks in a row. This week do half the sets and keep your streak alive. You get stronger while you rest.</div><button class="g" style="font-size:8px;margin-top:6px;padding:6px" data-a="dldis">GOT IT</button></div></div>`:""}
+let BD={};const BM=[["w","WEIGHT"],["wa","WAIST"],["c","CHEST"],["a","ARMS"]];
+function bodyHTML(){const k=ui.bm||"w",h=(S.body||[]).filter(z=>z[k]>0).map(z=>({d:z.d,v:z[k]}));return `<div class="c"><h2>BODY LOG</h2><p class="m">Fill in what you want and tap LOG. Any unit works, just stay consistent.</p>${BM.map(m=>`<label>${m[1]}</label><input type="number" inputmode="decimal" data-bd="${m[0]}" value="${BD[m[0]]||""}">`).join("")}<button style="width:100%" data-a="bdlog">LOG TODAY</button><br><br>${BM.map(m=>`<button class="${k==m[0]?"":"g"}" style="font-size:8px;margin:0 6px 6px 0" data-a="bdm" data-i="${m[0]}">${m[1]}</button>`).join("")}${h.length>1?chart(h):`<p class="m">Log at least two days to see a chart.</p>`}</div>`}
+const picHTML0=picHTML;picHTML=function(){return picHTML0()+bodyHTML()};
+function mkCard(cb){const p=pet(S.pet),L=lvl(),c=document.createElement("canvas");c.width=600;c.height=340;const x=c.getContext("2d"),t=S.theme.c,im=new Image();
+ im.onload=()=>{x.fillStyle=t[0];x.fillRect(0,0,600,340);x.strokeStyle=t[3];x.lineWidth=10;x.strokeRect(5,5,590,330);x.imageSmoothingEnabled=false;x.drawImage(im,330,70,238,204);x.fillStyle=t[2];x.font="22px 'Press Start 2P',monospace";x.fillText("FORGE",30,60);x.fillStyle=t[4];x.font="14px 'Press Start 2P',monospace";[["@"+P.user,110],["LEVEL "+L.l,150],["STREAK "+S.streak+" DAYS",190],["WORKOUTS "+(S.wc||0),230],["BEST STREAK "+S.best,270]].forEach(r=>x.fillText(r[0],30,r[1]));cb(c.toDataURL("image/png"))};im.src=sprite(p,stage(),t[4],S.hat)}
+function cardHTML(){return `<div class="c"><h2>SHARE</h2><button style="width:100%" data-a="card">MAKE STATS CARD</button>${ui.card?`<img src="${ui.card}" style="width:100%;margin-top:8px;image-rendering:pixelated"><p class="m">Press and hold the image to save it, or tap SHARE.</p><button class="g" data-a="share">SHARE</button>`:""}</div>`}
+const statsHTML0=statsHTML;statsHTML=function(){return statsHTML0()+cardHTML()};
+document.addEventListener("input",e=>{const d=e.target.dataset;if(d.bd)BD[d.bd]=e.target.value});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||!P)return;const a=b.dataset.a,i=b.dataset.i;let ch=1;
+ if(a=="dldis")S.dl=wkKey();
+ else if(a=="bdm")ui.bm=i;
+ else if(a=="bdlog"){const r={d:dk()};BM.forEach(m=>{if(BD[m[0]]>0)r[m[0]]=+BD[m[0]]});if(Object.keys(r).length==1){toast("Enter a number first");ch=0}else{S.body=(S.body||[]).filter(z=>z.d!=dk());S.body.push(r);BD={};toast("Logged")}}
+ else if(a=="card"){mkCard(u=>{ui.card=u;render()});ch=0}
+ else if(a=="share"){fetch(ui.card).then(r=>r.blob()).then(bl=>{const f=new File([bl],"forge-stats.png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]}))return navigator.share({files:[f]});toast("Press and hold the image to save it")}).catch(()=>toast("Press and hold the image to save it"));ch=0}
+ else if(a=="vc"){S.vc=S.vc===0?1:0;say("Voice cues on")}
+ else ch=0;
+ if(ch){save();render()}});
+let bailT=0;
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||!P)return;const a=b.dataset.a,i=b.dataset.i;let ch=1;
+ if(a=="begin"){begin();return}
+ else if(a=="pickday")ui.pk=+i;
+ else if(a=="closepk")ui.pk=null;
+ else if(a=="setplan"){plan()[ui.pk]=i;ui.pk=null}
+ else if(a=="chk"&&S.wo)S.wo.done[+i]=!S.wo.done[+i];
+ else if(a=="dur"&&S.wo){S.wo.dur=+i;S.wo.alarm=0;S.wo.cu={}}
+ else if(a=="bail2"){if(bailT>Date.now()){S.hunger=Math.max(0,S.hunger-20);endWk();toast("Bailed. Pet lost 20 food")}else{bailT=Date.now()+3000;toast("Tap again to bail (-20 food)");ch=0}}
+ else if(a=="finish"&&S.wo)finish();
+ else ch=0;
+ if(ch){save();render()}});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||!P)return;const a=b.dataset.a,i=b.dataset.i;let ch=1;
+ if(a=="panel"){ui.p=(ui.p==i||!i)?null:i;ui.b=1}
+ else if(a=="bar"){ui.b=ui.b?0:1;if(!ui.b)ui.p=null}
+ else if(a=="menu")ui.m=ui.m?0:1;
+ else if(a=="gear")ui.s=ui.s?0:1;
+ else if(a=="close")ui.s=0;
+ else if(a=="delpic"){PICS.splice(+i,1);sv("fg.pics",PICS)}
+ else if(a=="rmpfp"){PFP="";sv("fg.pfp","")}
+ else ch=0;
+ if(ch)render()});
+document.addEventListener("change",e=>{const t=e.target,k=t.dataset.f;if(!k||!t.files[0])return;shrink(t.files[0],k=="pfp"?160:480,u=>{if(k=="pfp"){PFP=u;sv("fg.pfp",PFP)}else{PICS.push({d:dk(),l:($("#pl")||{}).value||"PROGRESS",u});sv("fg.pics",PICS)}toast("Photo saved");t.value="";render()})});
+document.addEventListener("input",e=>{const k=e.target.dataset.k;if(k)F[k]=e.target.value;if(e.target.dataset.c!==undefined){S.theme.c[+e.target.dataset.c]=e.target.value;apply();save()}});
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,i=b.dataset.i;err="";
+ if(a=="mode"){mode=mode=="signup"?"login":"signup";step=1}
+ else if(a=="back")step--;
+ else if(a=="next"){if(step==1){if(!F.first||!F.last||!F.dob||!F.email)err="Fill everything in.";else if(age(F.dob)<14)err="You must be 14 or older.";else step=2}else{if(!F.user||!/^[a-z0-9_]{3,20}$/i.test(F.user))err="Username: 3-20 letters, numbers, _";else if(!F.pref||(F.password||"").length<8)err="Need a preferred name and 8+ char password.";else step=3}}
+ else if(a=="pick")F.pet=i;
+ else if(a=="preset"){S.theme={n:i,c:THEMES[i].slice()};apply();save()}
+ else if(a=="signup")await signup();
+ else if(a=="login")await login();
+ else if(a=="logout"){if(sb)await sb.auth.signOut();P=null;UID=null;S=defS();localStorage.removeItem("ip.v1");apply();mode="login"}
+ else if(a=="tab"&&!S.wk)tab=i;
+ else if(a=="add")add(i,+b.dataset.d);
+ else if(a=="feed"){const f=FOOD.find(x=>x[0]==i);if(S.coins>=f[1]){S.coins-=f[1];S.hunger=Math.min(100,S.hunger+f[2]);toast("Yum!");save()}}
+ else if(a=="selpet"){S.pet=i;save()}
+ else if(a=="start"){S.wk=Date.now();try{WL=await navigator.wakeLock.request("screen")}catch(x){}save()}
+ else if(a=="rest")rest=Date.now()+i*1e3;
+ else if(a=="end"){const m=(Date.now()-S.wk)/6e4,xp=Math.min(60,Math.floor(m)*2);S.xp+=xp;S.coins+=Math.round(xp/2);toast("Workout done +"+xp+" XP");S.wk=null;try{WL&&WL.release()}catch(x){}save()}
+ else if(a=="bail"){S.hunger=Math.max(0,S.hunger-20);S.wk=null;try{WL&&WL.release()}catch(x){}toast("Pet lost 20 food");save()}
+ render()});
+async function signup(){F.dob&&age(F.dob)<14?err="You must be 14 or older.":0;if(err)return;S.pet=F.pet;
+ const meta={first:F.first,last:F.last,dob:F.dob,username:F.user,pref:F.pref};
+ if(sb){const{data,error}=await sb.auth.signUp({email:F.email,password:F.password,options:{data:meta}});
+  if(error){err=error.message.includes("Database")?"Signup failed: username taken or under 14.":error.message;return}
+  if(!data.session){err="Check your email to confirm, then log in.";mode="login";return}
+  await load(data.user.id)}
+ else{P={first:F.first,last:F.last,dob:F.dob,user:F.user,pref:F.pref,tier:age(F.dob)>=18?"adult":"teen"};F.password="";save()}
+ if(P)apply()}
+async function login(){const{data,error}=await sb.auth.signInWithPassword({email:F.email,password:F.password});if(error){err=error.message;return}await load(data.user.id);F.password=""}
+async function load(uid){UID=uid;const pr=(await sb.from("profiles").select("*").eq("id",uid).single()).data,gs=(await sb.from("game_state").select("state").eq("user_id",uid).single()).data;
+ if(!pr){err="Profile not found.";return}
+ P={first:pr.first_name,last:pr.last_name,dob:pr.dob,user:pr.username,pref:pr.pref_name,tier:pr.age_tier};S=Object.assign(defS(),gs&&gs.state||{});if(!S.pet||S.pet==="wolf"&&F.pet)S.pet=F.pet||S.pet;rollover();apply();save()}
+(async()=>{try{const l=JSON.parse(localStorage.getItem("ip.v1")||"null");if(l&&!sb){P=l.P;S=Object.assign(defS(),l.S)}}catch(e){}
+ if(sb){const{data}=await sb.auth.getSession();if(data.session)await load(data.session.user.id);else mode="login"}
+ if(P)rollover();apply();render();tmr=setInterval(tickUI,1000)})();
+</script></body></html>
